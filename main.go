@@ -53,7 +53,9 @@ func main() {
 
 	
 	r := gin.Default()
+
 	r.Use(middleware.Recover())
+	r.Use(middleware.CORSConfig())
 
 	r.Static("/static", "./static")
 
