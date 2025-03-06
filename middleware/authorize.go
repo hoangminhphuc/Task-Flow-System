@@ -47,8 +47,6 @@ func RequiredAuth(authStore AuthenStore, tokenProvider tokenprovider.Provider) f
 					panic(err)
 			}
 
-			//db := appCtx.GetMaiDBConnection()
-			//store := userstore.NewSQLStore(db)
 			
 			payload, err := tokenProvider.Validate(token)
 			if err != nil {

@@ -21,11 +21,12 @@ import (
 	// "first-proj/module/item/model"
 	"first-proj/component/tokenprovider/jwt"
 	"first-proj/middleware"
-	"first-proj/module/user/storage"
 	ginitem "first-proj/module/item/transport/gin"
 	"first-proj/module/upload"
+	"first-proj/module/user/storage"
 	ginuser "first-proj/module/user/transport/gin"
 )
+
 
 
 func main() {
@@ -56,14 +57,13 @@ func main() {
 
 	r.Static("/static", "./static")
 
-
 	v1 := r.Group("/v1")
 {
 		v1.PUT("/upload", upload.Upload(db))
 
 		v1.POST("/register", ginuser.Register(db))
 		v1.POST("/login", ginuser.Login(db, tokenProvider))
-		v1.GET("/profile", middlewareAuth, ginuser.Profile())
+		v1.GET("/profile", middlewareAuth, ginuser.Profile(db))
 
     items := v1.Group("/items", middlewareAuth)
     {
@@ -75,11 +75,5 @@ func main() {
     }
 }
 
-
-  // r.GET("/ping", func(c *gin.Context) {
-  //   c.JSON(http.StatusOK, gin.H{
-  //     "message": "pong",
-  //   })
-  // })
   r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

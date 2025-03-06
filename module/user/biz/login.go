@@ -35,7 +35,6 @@ func NewLoginBusiness(storeUser LoginStorage, tokenProvider tokenprovider.Provid
 
 func (business *loginBusiness) Login(ctx context.Context, data *model.UserLogin) (tokenprovider.Token, error) {
 	user, err := business.storeUser.FindUser(ctx, map[string]interface{}{"email": data.Email})
-
 	if err != nil {
 			return nil, model.ErrEmailOrPasswordInvalid
 	}
