@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"first-proj/common"
-	"first-proj/component/tokenprovider"
+	"first-proj/plugin/tokenprovider"
 	"fmt"
 	"time"
 
@@ -56,7 +56,7 @@ func (j *jwtProvider) Generate(data tokenprovider.TokenPayLoad, expiry int) (tok
 	})
 
 
-
+	//return final token with 3 parts
 	tokenString, err := t.SignedString([]byte(j.secret))
 
 	if err != nil {
@@ -70,8 +70,15 @@ func (j *jwtProvider) Generate(data tokenprovider.TokenPayLoad, expiry int) (tok
 	}, nil
 }
 
+
+/* 
+* Validate a JWT, ensure its signature is correct,
+* check its validity (including expiration), 
+* and return the embedded custom payload if all checks pass.
+*/
 func (j *jwtProvider) Validate(myToken string) (tokenprovider.TokenPayLoad, error) {
 	res, err := jwt.ParseWithClaims(myToken, &myClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Return a secret key (convert to byte slice)
 		return []byte(j.secret), nil
 	})
 
@@ -83,6 +90,7 @@ func (j *jwtProvider) Validate(myToken string) (tokenprovider.TokenPayLoad, erro
 		return nil, tokenprovider.ErrInvalidToken
 	}
 
+	//Type assertion
 	claims, ok := res.Claims.(*myClaims)
 
 	if !ok {

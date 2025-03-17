@@ -2,8 +2,7 @@ package ginuser
 
 import (
 	"first-proj/common"
-	"first-proj/component/tokenprovider"
-	// "first-proj/component/tokenprovider/jwt"
+	"first-proj/plugin/tokenprovider"
 	"first-proj/module/user/biz"
 	"first-proj/module/user/model"
 	"first-proj/module/user/storage"

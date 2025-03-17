@@ -6,7 +6,7 @@ type SQLModel struct {
 	ID        int        `json:"-" gorm:"column:id;"`
 	FakeId    *UID       `json:"id" gorm:"-"`
 	CreatedAt *time.Time `json:"created_at" gorm:"column:created_at;"`
-	UpdatedAt *time.Time `json:"updated_at" gorm:"column:updated_at;"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty" gorm:"column:updated_at;"`
 }
 
 func (sqlModel *SQLModel) Mask(dbType DbType) {

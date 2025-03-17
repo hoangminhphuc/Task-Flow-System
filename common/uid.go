@@ -87,7 +87,7 @@ func FromBase58(s string) (UID, error) {
 }
 
 func (uid UID) MarshalJSON() ([]byte, error) {
-    return []byte(fmt.Sprintf("\"#%s\"", uid.String())), nil
+    return []byte(fmt.Sprintf("\"%s\"", uid.String())), nil
 }
 
 func (uid *UID) UnmarshalJSON(data []byte) error {

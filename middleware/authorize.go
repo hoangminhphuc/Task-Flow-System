@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"first-proj/common"
-	"first-proj/component/tokenprovider"
+	"first-proj/plugin/tokenprovider"
 	"first-proj/module/user/model"
 	"fmt"
 	"strings"
