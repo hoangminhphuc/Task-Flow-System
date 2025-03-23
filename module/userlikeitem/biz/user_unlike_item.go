@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"first-proj/common"
+	"first-proj/common/asyncjob"
 	"first-proj/module/userlikeitem/model"
 	"log"
 )
@@ -43,13 +44,18 @@ func (biz *userUnlikeItemBiz) UnlikeItem(ctx context.Context, userId, itemId int
 	}
 
 	//Nghiệp vụ phụ, chạy được hay không không quan tâm
-	go func ()  {
-		defer common.Recovery()
-		
+	
+	job := asyncjob.NewJob(func(ctx context.Context) error {
 		if err := biz.itemStore.DecreaseLikeCount(ctx, itemId); err != nil {
-			log.Println(err)
+			return err
 		}
-	}()
+
+		return nil
+	})
+
+	if err := asyncjob.NewGroup(true, job).Run(ctx); err != nil {
+		log.Println(err)
+	}
 
 	return nil
 }
