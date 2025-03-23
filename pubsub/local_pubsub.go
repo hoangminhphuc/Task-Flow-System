@@ -106,19 +106,24 @@ func (ps *localPubSub) run() error {
 					mess := <-ps.messageQueue
 					log.Println("Message dequeue:", mess.String())
 
-				// mess.Channel() retrieves the Topic for the message.
-				// ps.mapChannel map is checked for a key matching that topic.
-				// if ok, subs will hold a slice of subscribers.
+					ps.locker.RLock()
+					
+					// mess.Channel() retrieves the Topic for the message.
+					// ps.mapChannel map is checked for a key matching that topic.
+					// if ok, subs will hold a slice of subscribers.
 					if subs, ok := ps.mapChannel[mess.Channel()]; ok {
-							for i := range subs {
-									go func(c chan *Message) {
-											defer common.Recovery()
-
-										//The subscriber's channel receives the message.
-											c <- mess
-									}(subs[i]) // Pass like this will avoid closure capture problem.
+						for i := range subs {
+							go func(c chan *Message) {
+								defer common.Recovery()
+								
+								//The subscriber's channel receives the message.
+								c <- mess
+								}(subs[i]) // Pass like this will avoid closure capture problem.
 							}
-					}
+						}
+
+
+					ps.locker.RUnlock()
 			}
 	}()
 	
