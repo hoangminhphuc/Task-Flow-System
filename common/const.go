@@ -15,6 +15,9 @@ const (
 
 const (
 	PluginDBMain = "mysql"
+	PluginPubSub = "pubsub"
+
+	TopicUserLikedItem = "TopicUserLikedItem"
 )
 
 /* 

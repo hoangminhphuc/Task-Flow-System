@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"first-proj/common"
 	"first-proj/middleware"
 	ginitem "first-proj/module/item/transport/gin"
@@ -11,6 +12,8 @@ import (
 	"first-proj/plugin/sdkgorm"
 	"first-proj/plugin/simple"
 	"first-proj/plugin/tokenprovider/jwt"
+	"first-proj/pubsub"
+	"first-proj/subscriber"
 	"fmt"
 
 	goservice "github.com/200Lab-Education/go-sdk"
@@ -28,6 +31,7 @@ func newService() goservice.Service {
         goservice.WithName("social-todo-list"),
         goservice.WithVersion("1.0.0"),
         goservice.WithInitRunnable(sdkgorm.NewGormDB("main", common.PluginDBMain)),
+				goservice.WithInitRunnable(pubsub.NewPubSub(common.PluginPubSub)),
 				goservice.WithInitRunnable(simple.NewSimplePlugin("simple")),
     )
 
@@ -92,6 +96,8 @@ var rootCmd = &cobra.Command{
 						}
 				}
 			})
+
+			subscriber.IncreaseLikeCountAfterUserLikeItem(service, context.Background())
 
 			if err := service.Start(); err != nil {
 					serviceLogger.Fatalln(err)
