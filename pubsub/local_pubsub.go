@@ -15,6 +15,7 @@ import (
 // It has a queue (buffer channel) at its core and many groups of subscribers.
 // Because we want to send a message with a specific topic for many subscribers in a group to handle.
 type localPubSub struct {
+	name 				 string
 
 	// Messages flow from Publish → messageQueue → subscribers.
 	messageQueue chan *Message
@@ -27,15 +28,16 @@ type localPubSub struct {
 	locker       *sync.RWMutex
 }
 
-func NewPubSub() *localPubSub {
+func NewPubSub(name string) *localPubSub {
 	pb := &localPubSub{
+		name:         name,
 		messageQueue: make(chan *Message, 10000),
 		mapChannel:   make(map[Topic][]chan *Message),
 		locker:       new(sync.RWMutex),
 	}
 
 	// Starts reading messages from queue
-	pb.run()
+	// pb.run()
 
 	return pb
 }
@@ -47,7 +49,7 @@ func (ps *localPubSub) Publish(ctx context.Context, topic Topic, data *Message) 
 
 	go func() {
 			defer common.Recovery()
-			//sent message to queue
+			//sent real data (or message) to queue
 			ps.messageQueue <- data
 			log.Println("New message published:", data.String())
 	}()
@@ -55,6 +57,9 @@ func (ps *localPubSub) Publish(ctx context.Context, topic Topic, data *Message) 
 	return nil
 }
 
+/* 
+! Each time this function called, it generates new channel specificially to 1 subscriber
+*/
 func (ps *localPubSub) Subscribe(ctx context.Context, topic Topic) (ch <-chan *Message, unsubscribe func()) {
 	
 	c := make(chan *Message)
@@ -112,6 +117,8 @@ func (ps *localPubSub) run() error {
 					// ps.mapChannel map is checked for a key matching that topic.
 					// if ok, subs will hold a slice of subscribers.
 					if subs, ok := ps.mapChannel[mess.Channel()]; ok {
+
+					// Loops through all channels of subscribers
 						for i := range subs {
 							go func(c chan *Message) {
 								defer common.Recovery()
@@ -128,4 +135,34 @@ func (ps *localPubSub) run() error {
 	}()
 	
 	return nil
+}
+
+func (ps *localPubSub) GetPrefix() string {
+	return ps.name
+}
+
+func (ps *localPubSub) Get() interface{} {
+	return ps
+}
+
+func (ps *localPubSub) Name() string {
+	return ps.name
+}
+
+func (*localPubSub) InitFlags() {}
+
+func (*localPubSub) Configure() error {
+	return nil
+}
+
+func (ps *localPubSub) Run() error {
+	return ps.run()
+}
+
+func (*localPubSub) Stop() <-chan bool {
+	c := make(chan bool)
+	go func() {
+			c <- true
+	}()
+	return c
 }

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"context"
+	// "context"
 	"first-proj/common"
 	"first-proj/middleware"
 	ginitem "first-proj/module/item/transport/gin"
@@ -97,7 +97,7 @@ var rootCmd = &cobra.Command{
 				}
 			})
 
-			subscriber.IncreaseLikeCountAfterUserLikeItem(service, context.Background())
+			_ = subscriber.NewEngine(service).Start()
 
 			if err := service.Start(); err != nil {
 					serviceLogger.Fatalln(err)

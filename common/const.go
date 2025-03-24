@@ -18,6 +18,7 @@ const (
 	PluginPubSub = "pubsub"
 
 	TopicUserLikedItem = "TopicUserLikedItem"
+	TopicUserUnlikedItem = "TopicUserUnlikedItem"
 )
 
 /* 

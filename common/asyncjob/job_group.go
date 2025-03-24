@@ -81,9 +81,9 @@ func (g *group) runJob(ctx context.Context, j Job) error {
 					}
 			}
 
-			if j.Retry(ctx) == nil {
-					return nil
-			}
+			// if j.Retry(ctx) == nil {
+			// 		return nil
+			// }
 	}
 
 	return nil
