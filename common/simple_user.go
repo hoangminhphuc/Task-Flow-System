@@ -10,6 +10,7 @@ type SimpleUser struct {
 	Status 	 int 			`json:"status" gorm:"column:status;"`
 }
 
+
 func (SimpleUser) TableName() string {
 	return "users"
 }

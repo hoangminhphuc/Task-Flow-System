@@ -149,7 +149,8 @@ func (ps *localPubSub) Name() string {
 	return ps.name
 }
 
-func (*localPubSub) InitFlags() {}
+func (*localPubSub) InitFlags() {
+}
 
 func (*localPubSub) Configure() error {
 	return nil

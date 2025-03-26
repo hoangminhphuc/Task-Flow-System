@@ -8,12 +8,15 @@ import (
 
 	"net/http"
 
+	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func CreateItem(db *gorm.DB) func(ctx *gin.Context) {
+func CreateItem(serviceCtx goservice.ServiceContext) func(ctx *gin.Context) {
 	return func(c *gin.Context) {
+		db := serviceCtx.MustGet(common.PluginDBMain).(*gorm.DB)
+
 		var itemData model.TodoItemCreation
 
 		//parse request data (JSON in this case) and bind it to a struct.

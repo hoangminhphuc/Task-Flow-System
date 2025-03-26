@@ -6,16 +6,25 @@ import (
 	"first-proj/module/item/model"
 	"first-proj/module/item/repository"
 	"first-proj/module/item/storage"
+	"first-proj/module/item/storage/restapi"
 	"net/http"
 
-	userLikeStore "first-proj/module/userlikeitem/storage"
+
+	goservice "github.com/200Lab-Education/go-sdk"
+	// userLikeStore "first-proj/module/userlikeitem/storage"
+
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func ListItems(db *gorm.DB) func(ctx *gin.Context) {
+func ListItems(serviceCtx goservice.ServiceContext) func(ctx *gin.Context) {
 	return func(c *gin.Context) {
+		db := serviceCtx.MustGet(common.PluginDBMain).(*gorm.DB)
+
+		apiItemCaller := serviceCtx.MustGet(common.PluginItemAPI).(interface {
+			GetServiceURL() string
+		})
 
 		var queryString struct {
 			//embedded struct
@@ -37,7 +46,7 @@ func ListItems(db *gorm.DB) func(ctx *gin.Context) {
 
 
 		store := storage.NewSQLStore(db)
-		likeStore := userLikeStore.NewSQLStore(db)
+		likeStore := restapi.New(apiItemCaller.GetServiceURL(), serviceCtx.Logger("restapi.item"))
 		repo := repository.NewListItemRepo(store, likeStore, requester)
 		business := biz.NewListItemBiz(repo, requester)
 

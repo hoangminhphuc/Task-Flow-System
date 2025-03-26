@@ -9,6 +9,8 @@ import (
 	userstorage "first-proj/module/user/storage"
 	ginuser "first-proj/module/user/transport/gin"
 	ginuserlikeitem "first-proj/module/userlikeitem/transport/gin"
+	ginuserlikeitem_rpc "first-proj/module/userlikeitem/transport/rpc"
+	"first-proj/plugin/rpccaller"
 	"first-proj/plugin/sdkgorm"
 	"first-proj/plugin/simple"
 	"first-proj/plugin/tokenprovider/jwt"
@@ -32,6 +34,7 @@ func newService() goservice.Service {
         goservice.WithVersion("1.0.0"),
         goservice.WithInitRunnable(sdkgorm.NewGormDB("main", common.PluginDBMain)),
 				goservice.WithInitRunnable(pubsub.NewPubSub(common.PluginPubSub)),
+				goservice.WithInitRunnable(rpccaller.NewApiItemCaller(common.PluginItemAPI)),
 				goservice.WithInitRunnable(simple.NewSimplePlugin("simple")),
     )
 
@@ -65,7 +68,6 @@ var rootCmd = &cobra.Command{
 				}).GetValue()
 
 
-
 				db := service.MustGet(common.PluginDBMain).(*gorm.DB)
 
 				authStore := userstorage.NewSQLStore(db)
@@ -83,16 +85,21 @@ var rootCmd = &cobra.Command{
 
 						items := v1.Group("/items", middlewareAuth)
 						{
-								items.POST("", ginitem.CreateItem(db))
-								items.GET("", ginitem.ListItems(db) )
-								items.GET("/:id", ginitem.GetItem(db))
-								items.PATCH("/:id", ginitem.UpdateItem(db))
-								items.DELETE("/:id", ginitem.DeleteItem(db))
+							items.POST("", ginitem.CreateItem(service))
+							items.GET("", ginitem.ListItems(service))
+							items.GET("/:id", ginitem.GetItem(db))
+							items.PATCH("/:id", ginitem.UpdateItem(db))
+							items.DELETE("/:id", ginitem.DeleteItem(db))
 
-								//RPC
-								items.POST("/:id/like", ginuserlikeitem.LikeItem(service))
-								items.DELETE("/:id/unlike", ginuserlikeitem.UnlikeItem(service))
-								items.GET("/:id/likers", ginuserlikeitem.ListUserLikedItem(service))
+							//RPC
+							items.POST("/:id/like", ginuserlikeitem.LikeItem(service))
+							items.DELETE("/:id/unlike", ginuserlikeitem.UnlikeItem(service))
+							items.GET("/:id/likers", ginuserlikeitem.ListUserLikedItem(service))
+						}
+
+						rpc := v1.Group("/rpc")
+						{
+							rpc.POST("/get_item_likes", ginuserlikeitem_rpc.GetItemLikes(service))
 						}
 				}
 			})
