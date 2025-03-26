@@ -94,8 +94,6 @@ func ErrCannatListEntity(entity string, err error) *AppError {
 	)
 }
 
-
-
 func ErrCannotDeleteEntity(entity string, err error) *AppError { 
 	return NewCustomError(
 			err,
