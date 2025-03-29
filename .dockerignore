@@ -1,0 +1,16 @@
+.env
+
+build-service.sh
+*.exe
+*.out
+*.o
+
+Dockerfile-cache
+Dockerfile-multi-stage
+
+.vscode/
+.idea/
+*.iml
+
+.dockerignore
+
