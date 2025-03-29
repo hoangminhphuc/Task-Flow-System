@@ -11,6 +11,8 @@ This project implements a RESTful API built on Clean Architecture principles, wh
 - **Transport (HTTP Handlers):** Manages HTTP endpoints with Gin.
 - **Common:** Contains shared utilities, error handling, and token payload definitions.
 
+The system also supports **Pub/Sub messaging** for asynchronous event handling and **Job & Job Groups** for task scheduling and execution
+
 # Getting Started
 
 ## Prerequisites
@@ -54,6 +56,24 @@ The server should start on [http://localhost:8080](http://localhost:8080).
 
 # Running with Docker
 
+## Setting up MySQL in Docker
+
+Before running the system container, you need to start a MySQL container and ensure both containers are in the same network.
+
+### 1. Create a Docker Network (if not already created):
+```sh
+docker network create your-network-name
+```
+
+### 2. Start the MySQL Container:
+```sh
+docker run -d \
+  --name your-mysql-container-name \   # Replace with your MySQL container name
+  --network your-network-name \        # Must match the network used by the system container
+  -e MYSQL_ROOT_PASSWORD=your-password \  # Replace with your MySQL root password
+  mysql:latest
+```
+
 ## Building the Docker Image
 
 From the project root directory, build your Docker image. Replace `task-management-system:1.0` with your desired image name and tag if needed:
@@ -64,7 +84,7 @@ docker build -t task-management-system:1.0 .
 
 ## Single Container Deployment
 
-Use the command below to run your Docker container. **Replace the placeholder values with your own configuration details.**
+Use the command below to run your Docker container. **Ensure it uses the same network as MySQL. Replace the placeholder values with your own configuration details.**
 
 ```sh
 docker run -d \
