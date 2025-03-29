@@ -11,12 +11,71 @@ This project implements a RESTful API built on Clean Architecture principles, wh
 - **Transport (HTTP Handlers):** Manages HTTP endpoints with Gin.
 - **Common:** Contains shared utilities, error handling, and token payload definitions.
 
-## Features
+# Getting Started
 
-- **User Registration & Login:** Secure authentication with password hashing (bcrypt) and JWT token generation.
-- **Clean Architecture:** Separation of concerns between business logic, data access, and presentation layers.
-- **Database Interaction:** Uses GORM to simplify CRUD operations on your SQL database.
-- **Robust Error Handling:** Custom error types and logging to simplify debugging and maintenance.
+## Prerequisites
 
-## Architecture
+Ensure you have the following installed:
+
+- **Go** (>=1.18)
+- **Docker** (for database setup)
+- **MySQL** 
+
+## Installation
+
+### Clone the repository:
+
+```sh
+git clone https://github.com/hoangminhphuc/Task-Flow-System.git
+cd Task-Flow-System
+```
+
+### Copy and configure environment variables:
+
+```sh
+cp .env.example .env
+```
+
+### Install dependencies:
+
+```sh
+go mod tidy
+```
+
+## Running the Application
+
+### Run the application in development mode:
+
+```sh
+go build && ./Task-Flow-System
+```
+
+The server should start on [http://localhost:8080](http://localhost:8080).
+
+# Running with Docker
+
+## Building the Docker Image
+
+From the project root directory, build your Docker image. Replace `task-management-system:1.0` with your desired image name and tag if needed:
+
+```sh
+docker build -t task-management-system:1.0 .
+```
+
+## Single Container Deployment
+
+Use the command below to run your Docker container. **Replace the placeholder values with your own configuration details.**
+
+```sh
+docker run -d \
+  --name your-container-name \   # Replace with your container name
+  --network your-network-name \   # Replace with your Docker network name
+  -p HOST_PORT:CONTAINER_PORT \   # Replace with your desired port mapping (e.g., 8080:3000)
+  -e ITEM_SERVICE_URL="http://your-item-service:PORT" \  # Replace with your item service URL and port
+  -e MYSQL_GORM_DB_TYPE=mysql \
+  -e MYSQL_GORM_DB_URI="your-username:your-password@tcp(your-mysql-host:3306)/your-database?charset=utf8mb4&parseTime=True&loc=Local" \  # Update with your MySQL credentials and details
+  -e SECRET="your-secret" \  # Replace with your secret key
+  task-management-system:1.0
+```
+
 
