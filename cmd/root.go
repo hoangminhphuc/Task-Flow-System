@@ -17,10 +17,14 @@ import (
 	"first-proj/pubsub"
 	"first-proj/subscriber"
 	"fmt"
+	"log"
+	// "time"
 
 	goservice "github.com/200Lab-Education/go-sdk"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
+	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/trace"
 	"gorm.io/gorm"
 
 	// "net/http"
@@ -51,6 +55,7 @@ var rootCmd = &cobra.Command{
 
 			serviceLogger := service.Logger("service")
 
+		// init all the services that have been registered in the initServices map.
 			if err := service.Init(); err != nil {
 					serviceLogger.Fatalln(err)
 			}
@@ -63,9 +68,9 @@ var rootCmd = &cobra.Command{
 			! Example of how to use plugin
 			*/		
 				//inline implement interface
-				service.MustGet("simple").(interface{
-					GetValue() string
-				}).GetValue()
+				// service.MustGet("simple").(interface{
+				// 	GetValue() string
+				// }).GetValue()
 
 
 				db := service.MustGet(common.PluginDBMain).(*gorm.DB)
@@ -103,6 +108,18 @@ var rootCmd = &cobra.Command{
 						}
 				}
 			})
+
+			je, err := jaeger.NewExporter(jaeger.Options{
+				AgentEndpoint: os.Getenv("JAEGER_AGENT_URL"),
+				Process: jaeger.Process{ServiceName: "Task-Management-System"},	
+			})
+
+			if err != nil {
+				log.Println(err)
+			}
+
+			trace.RegisterExporter(je)
+			trace.ApplyConfig(trace.Config{DefaultSampler: trace.ProbabilitySampler(1)})
 
 			_ = subscriber.NewEngine(service).Start()
 

@@ -6,23 +6,25 @@ import (
 
 	"context"
 
+	"go.opencensus.io/trace"
 	"gorm.io/gorm"
 )
 
-
-/* 
+/*
 	! Storage layer
 */
 
-
-/* 
-	* This implements GetItemStorage interface because this function 
-	* is a method of struct sqlStore. 
+/*
+	* This implements GetItemStorage interface because this function
+	* is a method of struct sqlStore.
 	! Only struct can implement interface
- */
+*/
 
 
 func (s *sqlStore) GetItem(ctx context.Context, cond map[string]interface{}) (*model.TodoItem, error) {
+	_, span := trace.StartSpan(ctx, "item.storage.find")
+    defer span.End()
+	
 	var data model.TodoItem
 
 

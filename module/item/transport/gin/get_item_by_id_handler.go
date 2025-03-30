@@ -40,6 +40,8 @@ func GetItem(db *gorm.DB) func(*gin.Context) {
 			// panic(err) => only for practice, not best practice
 		}
 
+		data.Mask()
+
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
 
 	}

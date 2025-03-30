@@ -20,6 +20,9 @@ import (
 
 func ListItems(serviceCtx goservice.ServiceContext) func(ctx *gin.Context) {
 	return func(c *gin.Context) {
+
+	// MustGet returns a value of type PrefixRunnable for a given prefix
+	// This is inside the initServices array
 		db := serviceCtx.MustGet(common.PluginDBMain).(*gorm.DB)
 
 		apiItemCaller := serviceCtx.MustGet(common.PluginItemAPI).(interface {

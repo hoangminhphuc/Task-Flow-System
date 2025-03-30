@@ -1,13 +1,18 @@
 package storage
 
 import (
-    "context"
-    "first-proj/common"
-    "first-proj/module/user/model"
-    "gorm.io/gorm"
+	"context"
+	"first-proj/common"
+	"first-proj/module/user/model"
+
+	"go.opencensus.io/trace"
+	"gorm.io/gorm"
 )
 
 func (s *sqlStore) FindUser(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*model.User, error) {
+    _, span := trace.StartSpan(ctx, "user.storage.find")
+    defer span.End()
+    
     db := s.db.Table(model.User{}.TableName())
 
     for i := range moreInfo {

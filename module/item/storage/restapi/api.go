@@ -24,7 +24,8 @@ func New(serviceURL string, logger logger.Logger) *itemService {
 }
 
 func (s *itemService) GetItemLikes(ctx context.Context, ids []int) (map[int]int, error) {
-		type requestBody struct {
+	//get converted into json request	
+	type requestBody struct {
 			Ids []int `json:"ids"`
 		}
 
@@ -32,10 +33,10 @@ func (s *itemService) GetItemLikes(ctx context.Context, ids []int) (map[int]int,
 			Data map[int]int `json:"data"`
 		}
 
-		resp, err := s.client.R().
+		resp, err := s.client.R(). // creates new request
 			SetHeader("Content-Type", "application/json").
 			SetBody(requestBody{Ids: ids}).
-			SetResult(&response).
+			SetResult(&response). // parses JSON response into the Go struct
 			Post(fmt.Sprintf("%s/%s", s.serviceURL, "v1/rpc/get_item_likes"))
 
 		if err != nil {
