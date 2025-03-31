@@ -3,6 +3,7 @@ package cmd
 import (
 	// "context"
 	"first-proj/common"
+	"first-proj/memcache"
 	"first-proj/middleware"
 	ginitem "first-proj/module/item/transport/gin"
 	"first-proj/module/upload"
@@ -18,6 +19,7 @@ import (
 	"first-proj/subscriber"
 	"fmt"
 	"log"
+
 	// "time"
 
 	goservice "github.com/200Lab-Education/go-sdk"
@@ -76,8 +78,11 @@ var rootCmd = &cobra.Command{
 				db := service.MustGet(common.PluginDBMain).(*gorm.DB)
 
 				authStore := userstorage.NewSQLStore(db)
+				authCache := memcache.NewUserCaching(memcache.NewCaching(), authStore)
+				
+				
 				tokenProvider := jwt.NewTokenJWTProvider("jwt", systemSecret)
-				middlewareAuth := middleware.RequiredAuth(authStore, tokenProvider)
+				middlewareAuth := middleware.RequiredAuth(authCache, tokenProvider)
 
 
 				v1 := engine.Group("/v1")
@@ -92,7 +97,7 @@ var rootCmd = &cobra.Command{
 						{
 							items.POST("", ginitem.CreateItem(service))
 							items.GET("", ginitem.ListItems(service))
-							items.GET("/:id", ginitem.GetItem(db))
+							items.GET("/:id", ginitem.GetItem(service))
 							items.PATCH("/:id", ginitem.UpdateItem(db))
 							items.DELETE("/:id", ginitem.DeleteItem(db))
 
