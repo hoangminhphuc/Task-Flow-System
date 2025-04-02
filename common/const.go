@@ -17,6 +17,7 @@ const (
 	PluginDBMain = "mysql"
 	PluginPubSub = "pubsub"
 	PluginItemAPI = "item-api"
+	PluginRedis = "redis"
 
 	TopicUserLikedItem = "TopicUserLikedItem"
 	TopicUserUnlikedItem = "TopicUserUnlikedItem"
