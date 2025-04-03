@@ -4,7 +4,9 @@ import (
 	"context"
 	"first-proj/module/user/model"
 	"fmt"
+	"log"
 	"sync"
+	"time"
 )
 
 type RealStore interface {
@@ -12,12 +14,12 @@ type RealStore interface {
 }
 
 type userCaching struct {
-	store     Caching
+	store     Cache
 	realStore RealStore
 	once      *sync.Once
 }
 
-func NewUserCaching(store Caching, realStore RealStore) *userCaching {
+func NewUserCaching(store Cache, realStore RealStore) *userCaching {
 	return &userCaching{
 		store:     store,
 		realStore: realStore,
@@ -26,22 +28,43 @@ func NewUserCaching(store Caching, realStore RealStore) *userCaching {
 }
 
 func (uc *userCaching) FindUser(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*model.User, error) {
+	var user model.User
+	
 	userId := conditions["id"].(int)
 	key := fmt.Sprintf("user-%d", userId)
-	userInCache := uc.store.Read(key)
+	err := uc.store.Get(ctx, key, &user)
 
-	if userInCache != nil {
-			return userInCache.(*model.User), nil
+	// Found in cache, returns immediately
+	if err != nil && user.ID > 0 {
+			return &user, nil
 	}
 
+	var userErr error
+
 	uc.once.Do(func() {
-			user, err := uc.realStore.FindUser(ctx, conditions, moreInfo...)
-			if err != nil {
-					panic(err)
-			}
+			realUser, userErr := uc.realStore.FindUser(ctx, conditions, moreInfo...)
+
+			if userErr != nil {
+					log.Println(userErr)
+					return
+			} 
 			// Update cache
-			uc.store.Write(key, user)
+			user = *realUser
+			_ = uc.store.Set(ctx, key, realUser, time.Hour * 2)
 	})
+
+	if userErr != nil {
+			return nil, userErr
+	}
+
+	// Ensures all goroutines get the latest cached result instead of making DB calls.
+	err = uc.store.Get(ctx, key, &user)
+
+	if err != nil && user.ID > 0 {
+			return &user, nil
+	}
 	
-	return uc.store.Read(key).(*model.User), nil
+	// Even after second attempt retrieving from cache, it still returns error
+	// Then return nil
+	return nil, err
 }

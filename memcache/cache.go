@@ -1,10 +1,17 @@
 package memcache
 
-import "sync"
+import (
+	"context"
+	"sync"
+	"time"
+)
 
-type Caching interface {
-    Write(k string, value interface{})
-    Read(k string) interface{}
+
+// Defines a standard caching interface for different implementations (in-mem, Redis).
+type Cache interface {
+    Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error
+    Get(ctx context.Context, key string, value interface{}) error
+    Delete(ctx context.Context, key string) error
 }
 
 type caching struct {
@@ -19,14 +26,18 @@ func NewCaching() *caching {
     }
 }
 
-func (c *caching) Write(k string, value interface{}) {
+func (c *caching) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
 	c.locker.Lock()
 	defer c.locker.Unlock()
-	c.store[k] = value
+	c.store[key] = value
+
+    return nil
 }
 
-func (c *caching) Read(k string) interface{} {
+func (c *caching) Get(ctx context.Context, key string, value interface{}) error {
 	c.locker.RLock()
 	defer c.locker.RUnlock()
-	return c.store[k]
+	value = c.store[key]
+
+    return nil
 }

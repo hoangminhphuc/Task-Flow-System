@@ -48,6 +48,8 @@ func (r *redisDB) IsDisabled() bool {
 	return r.RedisUri == ""
 }
 
+// Rgisters command-line flags that you can use when running the program.
+// ./app --redis-main-uri="redis://example.com:6380/1" --redis-main-pool-max-active=20
 func (r *redisDB) InitFlags() {
 	prefix := r.Prefix
 	if r.Prefix != "" {
@@ -74,23 +76,33 @@ func (r *redisDB) InitFlags() {
 	)
 }
 
+
+/* 
+* Establishes a connection to the Redis server 
+*/
+
 func (r *redisDB) Configure() error {
 	if r.IsDisabled() {
 			return nil
 	}
 
+	// Initializes the logger specific to this Redis instance 
 	r.logger = logger.GetCurrent().GetLogger(r.name)
-	r.logger.Info("Connecting to Redis at", r.RedisUri, "...")
+	r.logger.Info("Connecting to Redis at ", r.RedisUri, "...")
 
+	// Takes the Redis connection string and parse, then return a Redis options 
+	// that contain parsed connection details (addr, password, db number,...)
 	opt, err := redis.ParseURL(r.RedisUri)
 	if err != nil {
-			r.logger.Error("Cannot parse Redis URI:", err.Error())
+			r.logger.Error("Cannot parse Redis URI: ", err.Error())
 			return fmt.Errorf("failed to parse Redis URI: %w", err)
 	}
 
+	// Sets the pool size and minimum idle connections for the Redis client.
 	opt.PoolSize = r.MaxActive
 	opt.MinIdleConns = r.MaxIdle 
 
+	// Initializes a new Redis client with the given options.
 	client := redis.NewClient(opt)
 
 	// Ping to test Redis connection
@@ -118,6 +130,7 @@ func (r *redisDB) Run() error {
 }
 
 func (r *redisDB) Stop() <-chan bool {
+	// stops Redis connection
 	if r.client != nil {
 			if err := r.client.Close(); err != nil {
 					r.logger.Info("cannot close ", r.name, " error:", err)
