@@ -11,6 +11,7 @@ import (
 	ginuser "first-proj/module/user/transport/gin"
 	ginuserlikeitem "first-proj/module/userlikeitem/transport/gin"
 	ginuserlikeitem_rpc "first-proj/module/userlikeitem/transport/rpc"
+	"first-proj/plugin/appredis"
 	"first-proj/plugin/rpccaller"
 	"first-proj/plugin/sdkgorm"
 	"first-proj/plugin/simple"
@@ -41,6 +42,8 @@ func newService() goservice.Service {
         goservice.WithInitRunnable(sdkgorm.NewGormDB("main", common.PluginDBMain)),
 				goservice.WithInitRunnable(pubsub.NewPubSub(common.PluginPubSub)),
 				goservice.WithInitRunnable(rpccaller.NewApiItemCaller(common.PluginItemAPI)),
+				goservice.WithInitRunnable(appredis.NewRedisDB("redis", common.PluginRedis)),
+				
 				goservice.WithInitRunnable(simple.NewSimplePlugin("simple")),
     )
 
@@ -78,7 +81,7 @@ var rootCmd = &cobra.Command{
 				db := service.MustGet(common.PluginDBMain).(*gorm.DB)
 
 				authStore := userstorage.NewSQLStore(db)
-				authCache := memcache.NewUserCaching(memcache.NewCaching(), authStore)
+				authCache := memcache.NewUserCaching(memcache.NewRedisCache(service), authStore)
 				
 				
 				tokenProvider := jwt.NewTokenJWTProvider("jwt", systemSecret)
